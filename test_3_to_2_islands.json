@@ -81,6 +81,7 @@
   "number_of_repetitions": {
   "n_rep": 1
   },
+  "save_theor_IICR_as_file": 1,
   "vertical_lines":[6],
   "plot_densities": {
   "densities_to_plot": [],
