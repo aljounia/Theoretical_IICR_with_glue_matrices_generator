@@ -442,6 +442,23 @@ if __name__ == "__main__":
                 plot_label = p["theoretical_IICR_general"][i]["label"]
                 ax.plot(2 * N0 * g_time * t_k, N0 * theoretical_IICR_general_list[i],
                 color=linecolor, ls=line_style, alpha=alpha, label=plot_label)
+        if "save_theor_IICR_as_file" in p:
+            if p["save_theor_IICR_as_file"]:
+                for i in range(len(theoretical_IICR_general_list)):
+                    (time_k, theor_iicr) = (t_k,theoretical_IICR_general_list[i])
+                    with open("./IICR_gen_{}_text_file.txt".format(i), "w") as f:
+                        x2write = [str(2 * N0 * g_time * value) for value in t_k]
+                        IICR2write = [str(N0 * value) for value in theor_iicr]
+                        f.write("{}\n".format(" ".join(x2write)))
+                        f.write("{}\n".format(" ".join(IICR2write)))
+                for i in range(len(theoretical_IICR_nisland_list)):
+                    (time_k, theor_iicr) = (t_k,theoretical_IICR_nisland_list[i])
+                    with open("./IICR_nisland_{}_text_file.txt".format(i), "w") as f:
+                        x2write = [str(2 * N0 * g_time * value) for value in t_k]
+                        IICR2write = [str(N0 * value) for value in theor_iicr]
+                        f.write("{}\n".format(" ".join(x2write)))
+                        f.write("{}\n".format(" ".join(IICR2write)))
+
 
     # Plotting constant piecewise functions (if any)
     if "piecewise_constant_functions" in p:
