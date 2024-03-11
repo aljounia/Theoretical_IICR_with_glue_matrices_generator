@@ -20,7 +20,7 @@ Stationary n-island models are defined in the "theoretical_IICR_nisland" section
 
 All the other models are defined in the "theoretical_IICR_general" section of the .json file:
 + "M": list of migration matrices of the model (only one matrix if the model is stationary)
-+ "tau": list of the times of changes of the model (if the model is stationary, put [0])
++ "tau": list of the times of changes of the model (if the model is stationary, put [0]), the times are unscaled (if you want to know the scaled time to which it corresponds you just mutliply it by 2N0 * generation time)
 + "sampling": sampling scheme in the present
 + "size":relative sizes of the demes
 
@@ -39,7 +39,7 @@ You can plot piecewise-constant functions (for example to show the real populati
 The y value is continued constantly to the right from every x position, i.e. the interval [x[i], x[i+1]) has the value y[i] (see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.step.html for more information, we use step function with where='post').
 
 Important scale parameters are in the "scale_params" section:
-+ "N0": Initial population size
++ "N0": Initial population size, number of haploid individuals
 + "generation_time": Generation time of your specie
 
 General parameters of the plot are found in the "plot_params" section:
@@ -49,7 +49,11 @@ General parameters of the plot are found in the "plot_params" section:
 + "plot_xlabel": label of x-axis
 + "plot_ylabel": label of y-axis
 
-You can add vertical lines to the plot (for example to show time of changes in a non-stationary model) with the "vertical_lines" section, simply put a list of the x-values at which you want to draw a vertical line.
+You can add vertical lines to the plot (for example to show time of changes in a non-stationary model) with the "vertical_lines" section, simply put a list of the x-values (unscaled)  at which you want to draw a vertical line.
+
+You can save theoretical IICRs as text files by setting the "save_theor_IICR_as_file" to 1. After running the script, you will have text files named IICR_gen_{}_text_file.txt and IICR_nisland_{}_text_file.txt with two lines:
++ The first line contains backward times in units of 2N generations
++ The second line contains the values of the unscaled IICR at those specified times
 
 ## Running the script to compute a theoretical IICR
 1. Edit the parameter/configuration file in .json format
