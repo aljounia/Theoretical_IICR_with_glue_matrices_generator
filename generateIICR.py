@@ -142,9 +142,14 @@ if __name__ == "__main__":
     if p["plot_params"]["plot_theor_IICR"]:
         theoretical_IICR_nisland_list = []
         theoretical_IICR_general_list = []
-        T_max = np.log10(p["plot_params"]["plot_limits"][1])
-        t_k = np.logspace(-1, T_max, 1000)
-        t_k = np.true_divide(t_k, 2 * N0 * g_time)
+        if p["plot_params"]["time_log"]:
+            T_max = np.log10(p["plot_params"]["plot_limits"][1])
+            t_k = np.logspace(-1, T_max, 1000)
+            t_k = np.true_divide(t_k, 2 * N0 * g_time)
+        else:
+            T_max = p["plot_params"]["plot_limits"][1]
+            t_k = np.linspace(0, T_max, 1000)
+            t_k = np.true_divide(t_k, 2 * N0 * g_time)
         if "theoretical_IICR_nisland" in p:
             for i in range(len(p["theoretical_IICR_nisland"])):
                 params = p["theoretical_IICR_nisland"][i]
@@ -209,7 +214,8 @@ if __name__ == "__main__":
     if "y_scale" in p["plot_params"]:
         if p["plot_params"]["y_scale"] == "log":
             ax.set_yscale('log')
-    ax.set_xscale('log')
+    if p["plot_params"]["time_log"]:
+        ax.set_xscale('log')
     plt.legend(loc='best')
     [x_a, x_b, y_a, y_b] = p["plot_params"]["plot_limits"]
     plt.xlim(x_a, x_b)
