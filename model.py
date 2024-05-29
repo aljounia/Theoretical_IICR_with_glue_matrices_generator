@@ -67,7 +67,6 @@ class NSSC:
             Q = self.createQmatrix(np.array(d['M']), np.array(d['c']), lineages_are_dist)
             Qmatrix_list.append(Q)
             eigenvalues = np.linalg.eigvals(Q)
-            #print(eigenvalues)
             # Compute the eigenvalues and vectors for the diagonalization
         self.time_list = time_list
         self.migMatrix_list = migMatrix_list
@@ -160,7 +159,7 @@ class NSSC:
                       [l for l in range(ndemes2**2)]))
 
         for key in d1.keys():
-            if key[1] < ndemes2 :
+            if key[1] < ndemes2 : #Persistent state
                 G[d1[key],d2[key]] = 1
             elif key[1] >= ndemes2:
                 neighbours = self.find_neighbours(key[1],M1,ndemes2)
@@ -180,25 +179,21 @@ class NSSC:
                                 G[d1[key],d2[ind_col]] = proba_1*proba_2 
                 elif key[0] >= ndemes2 and key[1] >= ndemes2:
                     neighbours_2 = self.find_neighbours(key[0],M1,ndemes2)
-                    print(key,neighbours,neighbours_2)
                     for neighb_1 in neighbours:
                         for neighb_2 in neighbours_2:
                             proba_1 = self.find_proba(key[0],neighb_2,M1,ndemes2)
-                            print(proba_1)
                             proba_2 = self.find_proba(key[1],neighb_1,M1,ndemes2)
-                            print(proba_2)
                             if neighb_2 >= neighb_1:
                                 G[d1[key],d2[(neighb_1,neighb_2)]] = proba_1*proba_2
                             else:
                                 G[d1[key],d2[(neighb_2,neighb_1)]] = proba_1*proba_2
                             
-                else:
+                else: #If only one lineage needs to move
                     
                     colNumbers = [(key[0],l) for l in neighbours if (l >= key[0] and l < ndemes2)]
                     colNumbers.extend([(l,key[0]) for l in neighbours if (l < key[0] and key[0] < ndemes2)])
                     for colNumber in colNumbers:
-                        print(key[0],key[1],colNumber[0],colNumber[1])
-                        if key[0] == colNumber[0]:
+                        if key[0] == colNumber[0]: 
                             proba = self.find_proba(key[1],colNumber[1],M1,ndemes2)
                         else:
                             proba = self.find_proba(key[1],colNumber[0],M1,ndemes2)
@@ -221,7 +216,6 @@ class NSSC:
             P_delta_t = A.dot(exp_tD).dot(Ainv)
             if cum_prods[-1].shape[0] != P_delta_t.shape[0]:
                 glue_mat = self.glue_matrix_list[i-1]
-                print(i)
                 cum_prods.append(cum_prods[-1].dot(glue_mat).dot(P_delta_t))
             else :
                 cum_prods.append(cum_prods[-1].dot(P_delta_t))
@@ -229,7 +223,6 @@ class NSSC:
         diagonalizedQ_list.append((A, D, Ainv))
         self.diagonalizedQ_list = diagonalizedQ_list
         self.cum_prods = cum_prods
-        #print('cum',cum_prods)
 
     def diagonalize_Q(self, Q):
         # Compute the eigenvalues and vectors for the diagonalization
@@ -302,11 +295,11 @@ class NSSC:
         f_x = np.ones(len(t))
         quotient_F_f = np.ones(len(t))
         eigvals = list(np.linalg.eigvals(self.Qmatrix_list[-1]))
-        print("eig",eigvals)
+        print("eigenvalues of Q ",eigvals)
         while max(eigvals) >= 0:
             eigvals.remove(max(eigvals))
         plateau = (-1)/max(eigvals)
-        print(plateau)
+        print("plateau ",plateau)
         prec_plateau = 1e-3
         F_x[0] = self.cdfT2(t[0])
         if not(0<=F_x[0]<=1): F_x[0]=1
@@ -318,7 +311,7 @@ class NSSC:
             F_x[i] = self.cdfT2(t[i])
             f_x[i] = self.pdfT2(t[i])
             quot_F_f = (1-F_x[i])/f_x[i]
-            if i>10 and ((abs(quot_F_f-plateau) < prec_plateau) or (np.allclose(quotient_F_f[i-10:i- 1],np.repeat(plateau,9)))):
+            if i > 500 and t[i]>self.time_list[-1] and ((abs(quot_F_f-plateau) < prec_plateau) or (np.allclose(quotient_F_f[i-10:i- 1],np.repeat(plateau,9)))):
                 quotient_F_f[i] = plateau
             else:
                 quotient_F_f[i] = quot_F_f
