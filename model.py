@@ -241,8 +241,17 @@ class NSSC:
         demographic event (i.e. the last change in the migration rate).
         """
         (A, D, Ainv) = self.diagonalizedQ_list[i]
-        exp_tD = np.diag(np.exp(t * np.diag(D)))
-        return(A.dot(exp_tD).dot(Ainv))
+
+        exp_tD = np.exp(t * np.diag(D))
+        # Equivalent to A.dot(np.diag(exp_tD)).dot(Ainv)
+        # but requires one dimension less multiplication
+        # (temporal and spacial optimization)
+        # See Numpy documentation on Broadcasting
+        product = A * exp_tD * Ainv
+
+        #expected = A.dot(np.diag(exp_tD)).dot(Ainv)
+        #np.array_equal(product, expected)
+        return product
 
     def evaluate_Pt(self, t, P_delta_t_cache=None):
         """
