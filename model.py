@@ -244,29 +244,29 @@ class NSSC:
         exp_tD = np.diag(np.exp(t * np.diag(D)))
         return(A.dot(exp_tD).dot(Ainv))
 
-    def evaluate_Pt(self, t):
+    def evaluate_Pt(self, t, P_delta_t_cache=None):
         """
         Evaluate the transition semigroup at t.
         Uses previously computed values to speed up the computation.
         """
         # Get the left of the time interval that contains t.
         i = bisect.bisect_right(self.time_list, t) - 1
-        P_deltaT = self.exponential_Q(t - self.time_list[i], i)
+        P_deltaT = self.exponential_Q(t - self.time_list[i], i) if P_delta_t_cache is None else P_delta_t_cache
         if (self.cum_prods[i].shape[0] != P_deltaT.shape[0]) or (self.cum_prods[i].shape[1] != P_deltaT.shape[1]):
             glue_mat = self.glue_matrix_list[i-1]
             P_deltaT = glue_mat.dot(P_deltaT)
         return(self.cum_prods[i].dot(P_deltaT))
 
 
-    def cdfT2(self, t):
+    def cdfT2(self, t, P_delta_t_cache=None):
         """
         Evaluates the cumulative distribution function of T2
         for the current model
         """
-        Pt = self.evaluate_Pt(t)
+        Pt = self.evaluate_Pt(t, P_delta_t_cache)
         return(np.real(Pt[self.initial_state_ix, -1]))
 
-    def pdfT2(self, t):
+    def pdfT2(self, t, P_delta_t_cache=None):
         """
         Evaluates the probability density function of T2
         for the current model
@@ -279,7 +279,7 @@ class NSSC:
         if cumulPt.shape[0] != Q.shape[0]:
             glue_mat = self.glue_matrix_list[i-1]
             Q = glue_mat.dot(Q)
-        P_delta_t = self.exponential_Q(t - self.time_list[i], i)
+        P_delta_t = self.exponential_Q(t - self.time_list[i], i) if P_delta_t_cache is None else P_delta_t_cache
         return(cumulPt.dot(Q).dot(P_delta_t)[S0, -1])
 
     def evaluateIICR(self, t):
@@ -308,13 +308,18 @@ class NSSC:
             f_x[0] = 1e-14
         quotient_F_f[0] = (1-F_x[0])/f_x[0]
         for i in range(1, len(t)):
-            F_x[i] = self.cdfT2(t[i])
-            f_x[i] = self.pdfT2(t[i])
+            # cache P_delta_t to avoid recomputing it
+            time_interval_containing_t = bisect.bisect_right(self.time_list, t[i]) - 1
+            P_delta_t = self.exponential_Q(t[i] - self.time_list[time_interval_containing_t], time_interval_containing_t)
+
+            F_x[i] = self.cdfT2(t[i], P_delta_t_cache=P_delta_t)
+            f_x[i] = self.pdfT2(t[i], P_delta_t_cache=P_delta_t)
             quot_F_f = (1-F_x[i])/f_x[i]
             if i > 500 and t[i]>self.time_list[-1] and ((abs(quot_F_f-plateau) < prec_plateau) or (np.allclose(quotient_F_f[i-10:i- 1],np.repeat(plateau,9)))):
                 quotient_F_f[i] = plateau
             else:
                 quotient_F_f[i] = quot_F_f
+        # PERF : mean, value and diff could be computed during the above loop
         mean_f_x = self.compute_mean(t)
         print("mean",mean_f_x)
         print("var",self.compute_var(t)-(mean_f_x**2))
