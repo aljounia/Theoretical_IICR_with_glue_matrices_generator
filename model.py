@@ -360,7 +360,7 @@ class NSSC:
             f_x[i] = self.pdfT2(t[i])
             if (f_x[i] < 1e-14) or (np.isinf(f_x[i])) or np.isnan(f_x[i]):
                 f_x[i] = f_x[i-1]
-        return integrate.simps(t*f_x, t)
+        return integrate.simpson(t*f_x, t)
 
     def compute_var(self, t):
         f_x = np.ones(len(t))
@@ -371,7 +371,7 @@ class NSSC:
             f_x[i] = self.pdfT2(t[i])
             if (f_x[i] < 1e-14) or (np.isinf(f_x[i])) or np.isnan(f_x[i]):
                 f_x[i] = f_x[i-1]
-        return integrate.simps((t**2)*f_x, t)
+        return integrate.simpson((t**2)*f_x, t)
 
     def compute_differences_between_pair(self, t, theta=0.001, k=2):
         f_x = np.ones(len(t))
@@ -382,7 +382,7 @@ class NSSC:
             f_x[i] = self.pdfT2(t[i])
             if (f_x[i] < 1e-14) or (np.isinf(f_x[i])) or np.isnan(f_x[i]):
                 f_x[i] = f_x[i-1]
-        return integrate.simps((e**(-2*t*theta))*f_x, t)
+        return integrate.simpson((e**(-2*t*theta))*f_x, t)
 
 class Pnisland(NSSC):
     """

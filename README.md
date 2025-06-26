@@ -48,6 +48,7 @@ General parameters of the plot are found in the "plot_params" section:
 + "plot_limits": list of four elements, the two first for the lower and upper limit of x-axis, and the two others for the lower and upper limit of y-axis
 + "plot_xlabel": label of x-axis
 + "plot_ylabel": label of y-axis
++ "time_log" : use logarithmic time scale
 
 You can add vertical lines to the plot (for example to show time of changes in a non-stationary model) with the "vertical_lines" section, simply put a list of the x-values (unscaled)  at which you want to draw a vertical line.
 
